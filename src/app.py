@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User
+from models import db, User, Planets, Characters
 #from models import Person
 
 app = Flask(__name__)
@@ -44,6 +44,83 @@ def handle_hello():
     }
 
     return jsonify(response_body), 200
+
+@app.route('/users', methods=['GET'])
+def get_all_users():
+    all_users = User.query.all()
+    all_users= list(map(lambda x: x.serialize(), all_users))
+    return jsonify(all_users), 200
+    #response =[]
+    #for user in all_users:
+        #response.append(user.serialize())
+    #return jsonify(response), 200
+
+@app.route('/users', methods=['POST'])
+def add_user():
+    data = request.get_json()
+    new_user= User(
+        email= data.get("email"),
+        password = data.get("password"),
+        is_active = data.get("is_active")
+    )
+    db.session.add(new_user)
+    db.session.commit()
+    return jsonify(new_user.serialize()), 201
+
+@app.route('/planets', methods=['GET'])
+def get_all_planets():
+    all_planets = Planets.query.all()
+    all_planets= list(map(lambda x: x.serialize(), all_planets))
+    return jsonify(all_planets), 200
+
+@app.route('/planets', methods=['POST'])
+def add_planet():
+    data = request.get_json()
+    new_planet= Planets(
+        name = data.get("name"),
+        terrain = data.get("terrain"),
+        climate = data.get("climate")
+    )
+    db.session.add(new_planet)
+    db.session.commit()
+    return jsonify(new_planet.serialize()), 201
+
+@app.route('/characters', methods=['GET'])
+def get_all_characters():
+    all_characters = Characters.query.all()
+    all_characters= list(map(lambda x: x.serialize(), all_characters))
+    return jsonify(all_characters), 200
+
+@app.route('/characters', methods=['POST'])
+def add_character():
+    data = request.get_json()
+    new_character= Characters(
+        name= data.get("name"),
+        gender = data.get("gender"),
+        height = data.get("height")
+    )
+    db.session.add(new_character)
+    db.session.commit()
+    return jsonify(new_character.serialize()), 201
+
+@app.route('/users/<int:user_id>', methods=['GET'])
+def get_single_user(user_id):
+    single_user = User.query.get(user_id)
+    single_user = single_user.serialize()
+    
+    return jsonify(single_user), 200
+
+@app.route('/planets/<int:planet_id>', methods=['GET'])
+def get_single_planet(planet_id):
+    single_planet = Planets.query.get(planet_id)
+    single_planet = single_planet.serialize()    
+    return jsonify(single_planet), 200
+
+@app.route('/characters/<int:character_id>', methods=['GET'])
+def get_single_character(character_id):
+    single_character = Characters.query.get(character_id)
+    single_character = single_character.serialize()    
+    return jsonify(single_character), 200
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
